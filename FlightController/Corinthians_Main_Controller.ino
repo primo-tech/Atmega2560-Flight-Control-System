@@ -36,6 +36,7 @@ double *yA;
 double *zA;
 
 double Ainput,Rinput,Pinput;
+double initialAlt;
 
 double ThrottleSetPoint;
 double AltitudeSetPoint;
@@ -163,6 +164,13 @@ void MainLoop()
   RollSetPoint = 0;
   YawSetPoint = 0;
   
+  initialAlt = 0;
+  for(int counter = 0; counter < 10; counter++)
+  {
+    initialAlt += readIn.Altitude();
+  }
+  initialAlt = initialAlt/10;
+  
   while(breakout != 1)
   {
     timer = millis();
@@ -184,7 +192,6 @@ void MainLoop()
     if(ThrottleSetPoint > 1050)
     {
         Ainput = y(0);
-        double initialAlt = 0;
         AltitudeSetPoint = motor.AltitudeControl(ThrottleSetPoint,Ainput,initialAlt); // calcute the altitude setpoint from throttle commands
         PitchSetPoint = map(ch[4],1000,1900,10,-10);
         RollSetPoint = map(ch[3],1000,1900,10,-10);   // read in roll pitch and yaw setpoint values from receiver
