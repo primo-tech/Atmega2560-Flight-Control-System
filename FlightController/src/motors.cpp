@@ -66,9 +66,7 @@ double Motors::AltitudeControl(double input,double sensorVal,double initial)
 }
 
 void Motors::MotorMix(Servo x, int y, int lower, int upper)
-{
-  y = map(y,-200,200,lower,upper);
-  
+{ 
   if (y > upper)
   {
     y = upper;
