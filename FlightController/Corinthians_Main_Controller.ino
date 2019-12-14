@@ -49,7 +49,7 @@ double YawSetPoint;
  */
 //--------------------------------------------------------------------------------------------------------------------
 Model<7,6,4> HexaModel;
-StateSpaceController<7,6,4,true,true> controller(HexaModel);
+StateSpaceController<14,6,4,true,true> controller(HexaModel);
 Matrix<4> y;
 //--------------------------------------------------------------------------------------------------------------------
 /*
@@ -72,13 +72,20 @@ void setup()
   Serial.println("Initialize BME280");
   Serial.println("Initialize MPU6050");
   
-  HexaModel.A << 0,0,0,0,0,0,0,
-                 0,0,0,0,0,0,0,
-                 0,0,0,0,0,0,0,
-                 0,0,0,0,0,0,0,       // Dynamics Matrix
-                 0,0,0,0,0,0,0,
-                 0,0,0,0,0,0,0,
-                 0,0,0,0,0,0,0;
+  HexaModel.A << 0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,       // Dynamics Matrix
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+				 0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0, 
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,00,0,0,0,0,0,0,;
                
   HexaModel.B << 0,0,0,0,0,0,
                  0,0,0,0,0,0,
@@ -86,12 +93,19 @@ void setup()
                  0,0,0,0,0,0,       // Control Matriix
                  0,0,0,0,0,0,
                  0,0,0,0,0,0,
+                 0,0,0,0,0,0,
+				 0,0,0,0,0,0,
+                 0,0,0,0,0,0,
+                 0,0,0,0,0,0,
+                 0,0,0,0,0,0,      
+                 0,0,0,0,0,0,
+                 0,0,0,0,0,0,
                  0,0,0,0,0,0;
 
-  HexaModel.C << 1,0,0,0,0,0,0,
-                 0,1,0,0,0,0,0,
-                 0,0,1,0,0,0,0,     // Sensor Matrix
-                 0,0,0,1,0,0,0;
+  HexaModel.C << 1,0,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,1,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,1,0,0,0,0,0,0,0,0,     // Sensor Matrix
+                 0,0,0,0,0,0,1,0,0,0,0,0,0;
 
   HexaModel.D << 0,0,0,0,0,0,
                  0,0,0,0,0,0,       // FeedForward Matrix
@@ -177,12 +191,11 @@ void MainLoop()
   
     read_rc();                      // begin decoding PPM values
     
-    y(0) = readIn.Altitude();       // read in current altitude value
-    
     xA = (double *)readIn.AxisXYZ();
     yA = (double *)readIn.AxisXYZ()+1;       // read in roll, pitch and yaw IMU values
     zA = (double *)readIn.AxisXYZ()+2;          
     
+	y(0) = readIn.Altitude();       // read in current altitude value
     y(1) = *xA -1.5;                          // Read in Systems Outputs
     y(2) = *yA;
     y(3) = *zA;
@@ -221,7 +234,7 @@ void MainLoop()
         }
     }
 
-    controller.update(y,timeStep);                        // calculate PID values
+    controller.update(y,timeStep);                        // Update Outputs values
  
     motor.FlightControl(controller.u(0),controller.u(1),controller.u(2),
                         controller.u(3),controller.u(4),controller.u(5));         // send controller output tomotors

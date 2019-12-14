@@ -88,8 +88,8 @@ void Motors::FlightControl(double m1,double m2,double m3,double m4,double m5,dou
   MotorMix(Motor2,m2,1300,2000); // Bottom Left
   MotorMix(Motor3,m3,1300,2000); // Top Right
   MotorMix(Motor4,m4,1300,2000); // Bottom Right
-  MotorMix(Motor5,m5,1100,2000); // Top Rear
-  MotorMix(Motor6,m6,1100,2000); // Bottom Rear
+  MotorMix(Motor5,m5,1300,2000); // Top Rear
+  MotorMix(Motor6,m6,1300,2000); // Bottom Rear
 }
 
 void Motors::StartUp()

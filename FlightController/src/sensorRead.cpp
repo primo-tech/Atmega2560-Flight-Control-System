@@ -33,12 +33,12 @@ float *Sensor::AxisXYZ()
   Vector norm = mpu.readNormalizeGyro();           // read in gyroscope values and accelerometer values
   Vector normAccel = mpu.readNormalizeAccel();     // as 1x3 vectors
    
-  gpitch = gpitch + norm.YAxis * timeStep;
-  groll = groll + norm.XAxis * timeStep;           // extract xyz rate values and calcutate position values
+  gpitch = groll + norm.XAxis * timeStep;
+  groll = gpitch + norm.YAxis * timeStep;           // extract xyz rate values and calcutate position values
   gyaw = gyaw + norm.ZAxis * timeStep;
    
-  int Pitch = -(atan2(normAccel.XAxis, sqrt(normAccel.YAxis*normAccel.YAxis + normAccel.ZAxis*normAccel.ZAxis))*180.0)/M_PI;
-  int Roll = (atan2(normAccel.YAxis, normAccel.ZAxis)*180.0)/M_PI;
+  int Pitch = (atan2(normAccel.YAxis, normAccel.ZAxis)*180.0)/M_PI;
+  int Roll = -(atan2(normAccel.XAxis, sqrt(normAccel.YAxis*normAccel.YAxis + normAccel.ZAxis*normAccel.ZAxis))*180.0)/M_PI;
    
   if(set_gyro_angles)
   {                                                 // if the IMU is already started
