@@ -83,20 +83,13 @@ void Motors::MotorMix(Servo x, int y, int lower, int upper)
 }
 
 void Motors::FlightControl(double m1,double m2,double m3,double m4,double m5,double m6)
-{
-  double Run1 = m1;     // Top Left
-  double Run2 = m2;     // Bottom Left
-  double Run3 = m3;     // Top Right
-  double Run4 = m4;     // Bottom Right
-  double Run5 = m5;     // Top Rear
-  double Run6 = m6;     // Bottom Rear
-  
-  MotorMix(Motor1,Run1,1300,2000);
-  MotorMix(Motor2,Run2,1300,2000);
-  MotorMix(Motor3,Run3,1300,2000);
-  MotorMix(Motor4,Run4,1300,2000);
-  MotorMix(Motor5,Run5,1100,2000);
-  MotorMix(Motor6,Run6,1100,2000);
+{    
+  MotorMix(Motor1,m1,1300,2000); // Top Left
+  MotorMix(Motor2,m2,1300,2000); // Bottom Left
+  MotorMix(Motor3,m3,1300,2000); // Top Right
+  MotorMix(Motor4,m4,1300,2000); // Bottom Right
+  MotorMix(Motor5,m5,1100,2000); // Top Rear
+  MotorMix(Motor6,m6,1100,2000); // Bottom Rear
 }
 
 void Motors::StartUp()
