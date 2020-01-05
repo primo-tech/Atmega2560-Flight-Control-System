@@ -13,20 +13,19 @@ BME280I2C bme;    // Default : forced mode, standby time = 1000 ms
                   
 void Initialise::InitSensors()
 {
-  Serial.println("");
   while(!bme.begin())
   {
-    Serial.println("Could not find BME280 sensor!");
+    //Serial.println("Could not find BME280 sensor!");
     delay(1000);
   }
 
   switch(bme.chipModel())
   {
      case BME280::ChipModel_BME280:
-       Serial.println("Found BME280 sensor! Success.");
+       //Serial.println("Found BME280 sensor! Success.");
        break;
      case BME280::ChipModel_BMP280:
-       Serial.println("Found BMP280 sensor! No Humidity available.");
+       //Serial.println("Found BMP280 sensor! No Humidity available.");
        break;
      default:
        Serial.println("Found UNKNOWN sensor! Error!");
@@ -34,10 +33,9 @@ void Initialise::InitSensors()
   
   while(!mpu.begin(MPU6050_SCALE_2000DPS, MPU6050_RANGE_2G))
   {
-    Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
+    //Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
     delay(500);
   }
-  
 }
 
 void Initialise::InitMotors()
@@ -60,9 +58,9 @@ void Initialise::InitMotors()
   motor.RunMotors(&Motor5,1000);
   motor.RunMotors(&Motor6,1000);
   
-  digitalWrite(12,0);
-  digitalWrite(13,1);
+  //digitalWrite(12,0);
+  //digitalWrite(13,1);
   delay(10000);
-  digitalWrite(12,1);
-  digitalWrite(13,0);
+  //digitalWrite(12,1);
+  //digitalWrite(13,0);
 }

@@ -7,7 +7,7 @@
 extern MPU6050 mpu;        // extern allows other files to use these values
 extern BME280I2C bme;      // Default : forced mode, standby time = 1000 ms
                            // Oversampling = pressure ×1, temperature ×1, humidity ×1, filter off,
-                  
+                                          
 double Sensor::Altitude()
 {
   float temp(NAN), hum(NAN), pres(NAN);
@@ -26,9 +26,9 @@ double Sensor::Altitude()
   return(h);                                       // return altitude value
 }
 
-float *Sensor::AxisXYZ()
+double *Sensor::AxisXYZ()
 {
-  static float Axis[3];                            // created a static array to hold output
+  static double Axis[3];                            // created a static array to hold output
   
   Vector norm = mpu.readNormalizeGyro();           // read in gyroscope values and accelerometer values
   Vector normAccel = mpu.readNormalizeAccel();     // as 1x3 vectors
@@ -62,4 +62,3 @@ float *Sensor::AxisXYZ()
    
   return(Axis);                                     // return array
 }
-

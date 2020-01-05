@@ -26,4 +26,4 @@ class Initialise               // create initialisation class
     void InitMotors();           // initialise the motors
 };
 
-#endif _INIT_
+#endif

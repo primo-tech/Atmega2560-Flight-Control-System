@@ -46,7 +46,7 @@ double Motors::AltitudeControl(double input,double sensorVal,double initial)
    else if( input < 1450 && input > 1350)
    {
      b = b - 0.5;
-      Setpoint = b;
+     Setpoint = b;
    }
    else if( input < 1350 && input > 1250)
    {
