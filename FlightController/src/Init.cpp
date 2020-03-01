@@ -57,10 +57,6 @@ void Initialise::InitMotors()
   motor.RunMotors(&Motor4,1000);          // set motors to lowest command value
   motor.RunMotors(&Motor5,1000);
   motor.RunMotors(&Motor6,1000);
-  
-  //digitalWrite(12,0);
-  //digitalWrite(13,1);
+
   delay(10000);
-  //digitalWrite(12,1);
-  //digitalWrite(13,0);
 }
