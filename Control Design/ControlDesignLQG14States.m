@@ -143,18 +143,12 @@ Cdtaug = [C zeros(r,r)];
 % State feedback control design with integral control via state augmentation
 % Z Phi Theta Psi are controlled outputs
 
-Q = diag([200,500,1000,0,1000,0,1000,0,0,0,0,0,0,0,1,35,35,0.4]); % State penalty
-R = (1*10^-3)*eye(6,6);  % Control penalty
+Q = diag([5000,1000,10000,0,10000,0,1000,2000,0,0,0,0,0,0,4,1000,1000,1]); % State penalty
+R = (0.5*10^-3)*eye(6,6);  % Control penalty
 
 Kdtaug = dlqr(Adtaug,Bdtaug,Q,R,0); % DT State-Feedback Controller Gains
 Kdt = Kdtaug(:,1:n);        % LQR Gains
 Kidt = Kdtaug(:,n+1:end);  % Integral Gains
-
-Kxr = zeros(14,4);
-Kxr(1,1) = 1;
-Kxr(3,2) = 1;
-Kxr(5,3) = 1;
-Kxr(7,4) = 1;
 
 %% Discrete-Time Kalman Filter Design x_dot = A*x + B*u + G*w, y = C*x + D*u + H*w + v
 
@@ -199,8 +193,6 @@ Xest = X;
 Xest(:,1) = x_ini+0.001*randn(14,1);
 Xreal(5:end,2) = x_ini;
 
-%U(:,1) = 0;
-
 for k = 2:kT-1
     
     %%Reference Setting
@@ -229,10 +221,10 @@ for k = 2:kT-1
 %    Xest(:,k) = Xreal([5,6,7,8,9,10,11,12,13:18],k);  % No KF Non Linear Prediction
 
    t_span = [0,T];
+   Y(:,k) = Xreal([5,7,9,11],k);
    xkf = [0;0;0;0;Xest(:,k-1)];  
    xode = ode45(@(t,X) Hex_Dynamics(t,X,U(:,k-1)),t_span,xkf); % Nonlinear Prediction
    Xest(:,k) = xode.y(5:18,end);
-   Y(:,k) = Xreal([5,7,9,11],k);
    e(:,k) = [Y(:,k) - Xest([1,3,5,7],k); 0; 0];
    Xest(:,k) = Xest(:,k) + Ldt*e(:,k);
     
@@ -246,7 +238,6 @@ for k = 2:kT-1
     Xe(:,k) = Xe(:,k-1) + (Ref - Xest([1,3,5,7],k));   % Integrator 
     %U(:,k) =  U_e - [Kdt,Kidt]*[Xest(:,k); Xe(:,k)];
     U(:,k) = min(800, max(0, U_e - [Kdt,Kidt]*[Xest(:,k); Xe(:,k)]));
-    %- [Ref(1);0;Ref(2);0;Ref(3);0;Ref(4);0;W_e]
     
     %Simulation    
     t_span = [0,T];
@@ -259,62 +250,62 @@ for k = 2:kT-1
 %    X(:,k+1) = Adt*X(:,k) + Bdt*U(:,k);  % Fully Linear Dynamics
 end
 
-% Rad2Deg = [180/pi,180/pi,180/pi]';
-% 
-% %Plots
-% t = (0:kT-1)*T;
-% figure(2);
-% subplot(2,1,1);
-% plot(t,Xreal(5,:));
-% legend('Alt');
-% title('Real Altitude');
-% xlabel('Time(s)');
-% ylabel('Meters(m)');
-% 
-% subplot(2,1,2);
-% plot(t,Xreal([7,9,11],:).*Rad2Deg);
-% legend('\phi','\theta','\psi');
-% title('Real Attitude');
-% xlabel('Time(s)');
-% ylabel('Degrees(d)');
-% 
-% figure(3);
-% subplot(2,1,1);
-% plot(t,Xest(1,:));
-% legend('Alt_e');
-% title('Estimated Altitude');
-% xlabel('Time(s)');
-% ylabel('Meters(m)');
-% 
-% subplot(2,1,2);
-% plot(t,Xest([3,5,7],:).*Rad2Deg);
-% legend('\phi_e','\theta_e','\psi_e');
-% title('Estimated Attitude');
-% xlabel('Time(s)');
-% ylabel('Degrees(d)');
-% 
-% figure(4);
-% subplot(2,1,1);
-% plot(t,e(1,:));
-% legend('e_z');
-% title('Altitude prediction error');
-% xlabel('Time(s)');
-% ylabel('Error meters(m)');
-% 
-% subplot(2,1,2);
-% plot(t,e([2,3,4],:).*Rad2Deg);
-% legend('e_\phi','e_\theta','e_\psi');
-% title('Attitude prediction error');
-% xlabel('Time(s)');
-% ylabel('Error degrees(d)');
-% 
-% figure(5);
-% plot(t,U);
-% legend('U1','U2','U3','U4','U5','U6');
-% title('Inputs PWM  Signal');
-% xlabel('Time(s)');
-% ylabel('Micro Seconds(ms)');
-% 
+Rad2Deg = [180/pi,180/pi,180/pi]';
+
+%Plots
+t = (0:kT-1)*T;
+figure(2);
+subplot(2,1,1);
+plot(t,Xreal(5,:));
+legend('Alt');
+title('Real Altitude');
+xlabel('Time(s)');
+ylabel('Meters(m)');
+
+subplot(2,1,2);
+plot(t,Xreal([7,9,11],:).*Rad2Deg);
+legend('\phi','\theta','\psi');
+title('Real Attitude');
+xlabel('Time(s)');
+ylabel('Degrees(d)');
+
+figure(3);
+subplot(2,1,1);
+plot(t,Xest(1,:));
+legend('Alt_e');
+title('Estimated Altitude');
+xlabel('Time(s)');
+ylabel('Meters(m)');
+
+subplot(2,1,2);
+plot(t,Xest([3,5,7],:).*Rad2Deg);
+legend('\phi_e','\theta_e','\psi_e');
+title('Estimated Attitude');
+xlabel('Time(s)');
+ylabel('Degrees(d)');
+
+figure(4);
+subplot(2,1,1);
+plot(t,e(1,:));
+legend('e_z');
+title('Altitude prediction error');
+xlabel('Time(s)');
+ylabel('Error meters(m)');
+
+subplot(2,1,2);
+plot(t,e([2,3,4],:).*Rad2Deg);
+legend('e_\phi','e_\theta','e_\psi');
+title('Attitude prediction error');
+xlabel('Time(s)');
+ylabel('Error degrees(d)');
+
+figure(5);
+plot(t,U);
+legend('U1','U2','U3','U4','U5','U6');
+title('Inputs PWM  Signal');
+xlabel('Time(s)');
+ylabel('Micro Seconds(ms)');
+
 % Cpoles = eig(Adtaug - (Bdtaug*[Kdt,Kidt]));
 % % System Unstable
 % 
@@ -325,6 +316,10 @@ end
 
 %% PRINT TO CONFIGURATION FILES
 
-K = round([Kdt,Kidt]',0);
+%K = round([Kdt,Kidt],2);
 
-writematrix(K,'config.txt','Delimiter','comma')
+writematrix(round(Kdt,2),'config.txt','Delimiter','comma')
+
+writematrix(round(Kidt,2),'config2.txt','Delimiter','comma')
+
+writematrix(round(Ldt,2),'config3.txt','Delimiter','comma')
