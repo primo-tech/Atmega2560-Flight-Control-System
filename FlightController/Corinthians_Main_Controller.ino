@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------------------------------
 #include "init.h"
 #include "motors.h"
-#include "sensorRead.h"
+#include "sensor.h"
 #include <StateSpaceControl.h>
 //---------------------------------------------------------------------------------------------------------------
 /*
@@ -38,7 +38,7 @@ Matrix<6> y;
 //--------------------------------------------------------------------------------------------------------------------
 Motors motor;                   // Instantiate motor control class
 Initialise inital;              // Instantiate initialisation class
-Sensor readIn;                  // Instantiate Sensor class
+Sensors sensor;                  // Instantiate Sensor class
 //--------------------------------------------------------------------------------------------------------------
 /*
  *                                   COMPONENT INITIALISATION LOOP 
@@ -208,11 +208,11 @@ void MainLoop()
   
     read_rc();                      // begin decoding PPM values
     
-    xA = readIn.AxisXYZ();
-    yA = readIn.AxisXYZ()+1;       // read in roll, pitch and yaw IMU values
-    zA = readIn.AxisXYZ()+2;          
+    xA = sensor.IMU();
+    yA = sensor.IMU()+1;       // read in roll, pitch and yaw IMU values
+    zA = sensor.IMU()+2;          
     
-	  y(0) = readIn.Altitude();       // read in current altitude value
+	  y(0) = sensor.ALT();       // read in current altitude value
     y(1) = *xA -1.5;                          // Read in Systems Outputs
     y(2) = *yA;
     y(3) = *zA;

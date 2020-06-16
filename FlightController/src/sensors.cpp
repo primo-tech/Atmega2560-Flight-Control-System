@@ -8,7 +8,7 @@ extern MPU6050 mpu;        // extern allows other files to use these values
 extern BME280I2C bme;      // Default : forced mode, standby time = 1000 ms
                            // Oversampling = pressure ×1, temperature ×1, humidity ×1, filter off,
                                           
-double Sensor::ALT()
+double Sensors::ALT()
 {
   float temp(NAN), hum(NAN), pres(NAN);
 
@@ -26,7 +26,7 @@ double Sensor::ALT()
   return(h);                                       // return altitude value
 }
 
-double *Sensor::IMU()
+double *Sensors::IMU()
 {
   static double Axis[3];                            // created a static array to hold output
   

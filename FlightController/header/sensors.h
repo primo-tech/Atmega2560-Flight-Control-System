@@ -1,5 +1,5 @@
-#ifndef _SENSORREAD_
-#define _SENSORREAD_
+#ifndef _SENSOR_
+#define _SENSOR_
 
 #if (ARDUINO >= 100)
   #include "Arduino.h"
@@ -11,7 +11,7 @@
 #include <BME280I2C.h>         // import wire library for i2c
 #include <MPU6050.h>           // BME library for barometer, MPU library for IMU
 
-class Sensor
+class Sensors
 {
   public:
     double ALT();       // calculated the current altitude above sea level
