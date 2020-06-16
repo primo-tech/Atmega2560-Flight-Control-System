@@ -23,7 +23,7 @@ void Motors::RunMotors(Servo* Motor,int Gain)
     Motor->writeMicroseconds(x);       // write gain to motors
 }
 
-double Motors::ALTControl(double input,double sensorVal,double initial)
+double Motors::AltitudeControl(double input,double sensorVal,double initial)
 {
   double b = sensorVal - initial; // start from zero;
   double Setpoint;                // variable for altitute hold setpoint
@@ -65,31 +65,31 @@ double Motors::ALTControl(double input,double sensorVal,double initial)
    return(Setpoint);
 }
 
-void Motors::Saturate(Servo Motor, int Signal, int lower, int upper)
+void Motors::MotorMix(Servo x, int y, int lower, int upper)
 { 
-  if (Signal > upper)
+  if (y > upper)
   {
-    Signal = upper;
+    y = upper;
   }
-  else if(Signal < lower)     // set upper and lower motor limits as each motor is different
+  else if(y < lower)     // set upper and lower motor limits as each motor is different
   {                      // lower limit = just when the motor starts moving
-    Signal = lower;
+    y = lower;
   }
   else
   {
-    Signal = Signal;
+    y = y;
   }
-  RunMotors(&Motor,Signal);
+  RunMotors(&x,y);
 }
 
 void Motors::FlightControl(double m1,double m2,double m3,double m4,double m5,double m6)
 {    
-  Saturate(Motor1,m1,1300,2000); // Top Left
-  Saturate(Motor2,m2,1300,2000); // Bottom Left
-  Saturate(Motor3,m3,1300,2000); // Top Right
-  Saturate(Motor4,m4,1300,2000); // Bottom Right
-  Saturate(Motor5,m5,1300,2000); // Top Rear
-  Saturate(Motor6,m6,1300,2000); // Bottom Rear
+  MotorMix(Motor1,m1,1300,2000); // Top Left
+  MotorMix(Motor2,m2,1300,2000); // Bottom Left
+  MotorMix(Motor3,m3,1300,2000); // Top Right
+  MotorMix(Motor4,m4,1300,2000); // Bottom Right
+  MotorMix(Motor5,m5,1300,2000); // Top Rear
+  MotorMix(Motor6,m6,1300,2000); // Bottom Rear
 }
 
 void Motors::StartUp()
