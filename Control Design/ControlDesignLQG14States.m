@@ -3,6 +3,9 @@ clear;     % clear workspace variables
 clc;       % clear command window
 format short;
 
+%% Octave Packeges
+%pkg load control;
+
 %% Mass of the Multirotor in Kilograms as taken from the CAD
 
 M = 1.455882; 
@@ -105,13 +108,12 @@ Ddt = sysdt.d;
 %% System Characteristics
 
 poles = eig(Adt);
-Jpoles = jordan(Adt);
 % System Unstable
 
-% figure(1)
-% plot(poles,'*');
-% grid on
-% title('Discrete System Eigenvalues');
+figure(1)
+plot(poles,'*')
+grid on
+title('Discrete System Eigenvalues')
 
 cntr = rank(ctrb(Adt,Bdt));
 % Fully Reachable
@@ -146,11 +148,17 @@ Cdtaug = [C zeros(r,r)];
 Q = diag([5000,1000,10000,0,10000,0,1000,2000,0,0,0,0,0,0,4,1000,1000,1]); % State penalty
 R = (0.5*10^-3)*eye(6,6);  % Control penalty
 
-Kdtaug = dlqr(Adtaug,Bdtaug,Q,R,0); % DT State-Feedback Controller Gains
+Kdtaug = dlqr(Adtaug,Bdtaug,Q,R); % DT State-Feedback Controller Gains
 Kdt = Kdtaug(:,1:n);        % LQR Gains
 Kidt = Kdtaug(:,n+1:end);  % Integral Gains
 
 %% Discrete-Time Kalman Filter Design x_dot = A*x + B*u + G*w, y = C*x + D*u + H*w + v
+% Utilises a 6 output model with motor 1 and 4 velocities being used as
+% virtual aditiional outputs. This is due to layout coupling leading to many different
+% combintaions of motor velocity producing the same outcome, therefore
+% making the system unobservale otherwise, therefore to combat this, 
+% the model is assumed to be perfect with reguargdes to the 2 motors and 
+% 0 error is fedback to the KF gains for the motors
 
 Cy = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
      0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
@@ -164,16 +172,17 @@ Dy = zeros(6,6);
 Gdt = 1e-1*eye(n);
 Hdt = zeros(size(Cy,1),size(Gdt,2)); % No process noise on measurements
 
-Rw = diag([0.001,1,0.00001,1,0.00001,1,0.00001,1,10^-10,10^-10,10^-10,10^-10,10^-10,10^-10]);   % Process noise covariance matrix
-Rv = diag([1,1,1,1,1,1])*10^-5;     % Measurement noise covariance matrix Note: use low gausian noice for Rv
+Rw = diag([0.5,0.5,0.01,0.1,0.01,0.01,0.01,0.01,10^-10,10^-10,10^-10,10^-10,10^-10,10^-10]);   % Process noise covariance matrix
+Rv = diag([500,10^-5,10^-5,10^-5,10^-5,10^-5]);     % Measurement noise covariance matrix Note: use low gausian noice for Rv
 
 sys4kf = ss(Adt,[Bdt Gdt],Cy,[Dy Hdt],T);
-
-[kdfilt,Ldt] = kalman(sys4kf,Rw,Rv); 
+Ldt = dlqe(Adt,Gdt,Cy,Rw,Rv);
+%sys4kf = ss(Adt,Bdt,Cy,Dy,T);
+%[kalm,Ldt] = kalman(sys4kf,Rw,Rv);  
 
 %%  Dynamic Simulation
 
-Time = 100;
+Time = 50;
 kT = round(Time/T);
 
 X = zeros(14,kT);
@@ -220,28 +229,27 @@ for k = 2:kT-1
      
 %    Xest(:,k) = Xreal([5,6,7,8,9,10,11,12,13:18],k);  % No KF Non Linear Prediction
 
-   t_span = [0,T];
-   Y(:,k) = Xreal([5,7,9,11],k);
-   xkf = [0;0;0;0;Xest(:,k-1)];  
-   xode = ode45(@(t,X) Hex_Dynamics(t,X,U(:,k-1)),t_span,xkf); % Nonlinear Prediction
-   Xest(:,k) = xode.y(5:18,end);
-   e(:,k) = [Y(:,k) - Xest([1,3,5,7],k); 0; 0];
-   Xest(:,k) = Xest(:,k) + Ldt*e(:,k);
+    t_span = [0,T];
+    Y(:,k) = Xreal([5,7,9,11],k);
+    xkf = [0;0;0;0;Xest(:,k-1)];  
+    xode = ode45(@(t,X) Hex_Dynamics(t,X,U(:,k-1)),t_span,xkf); % Nonlinear Prediction
+    Xest(:,k) = xode.y(5:18,end);
+    e(:,k) = [Y(:,k) - Xest([1,3,5,7],k); 0; 0];
+    Xest(:,k) = Xest(:,k) + Ldt*e(:,k);
     
-%     Y(:,k) = Xreal([5,7,9,11],k);
-%     Xest(:,k) = Adt*Xest(:,k-1) + Bdt*(U(:,k-1)-U_e);   % Linear Prediction
-%     e(:,k) = [Y(:,k) - Xest([1,3,5,7],k); 0; 0];
-%     Xest(:,k) = Xest(:,k) + Ldt*e(:,k);
-%     
-    
+%    Y(:,k) = Xreal([5,7,9,11],k);
+%    Xest(:,k) = Adt*Xest(:,k-1) + Bdt*(U(:,k-1)-U_e);   % Linear Prediction
+%    e(:,k) = [Y(:,k) - Xest([1,3,5,7],k); 0; 0];
+%    Xest(:,k) = Xest(:,k) + Ldt*e(:,k);
+   
     %%Control
     Xe(:,k) = Xe(:,k-1) + (Ref - Xest([1,3,5,7],k));   % Integrator 
     %U(:,k) =  U_e - [Kdt,Kidt]*[Xest(:,k); Xe(:,k)];
-    U(:,k) = min(800, max(0, U_e - [Kdt,Kidt]*[Xest(:,k); Xe(:,k)]));
+    U(:,k) = min(800, max(0, U_e - [Kdt,Kidt]*[Xest(:,k); Xe(:,k)])); % Saturation 
     
     %Simulation    
     t_span = [0,T];
-    xode = ode45(@(t,X) Hex_Dynamics(t,X,U(:,k)),t_span,Xreal(:,k));
+    xode = ode45(@(t,X) Hex_Dynamics(t,X,U(:,k)),t_span,Xreal(:,k)); % Runge-Kutta Integration Nonlinear Dynamics
     Xreal(:,k+1) = xode.y(:,end);
     
 %    [dX] = Hex_Dynamics(t,Xreal(:,k),U(:,k)); % Forward Euler Integration Nonlinear Dynamics
@@ -254,72 +262,72 @@ Rad2Deg = [180/pi,180/pi,180/pi]';
 
 %Plots
 t = (0:kT-1)*T;
-figure(2);
-subplot(2,1,1);
-plot(t,Xreal(5,:));
-legend('Alt');
-title('Real Altitude');
-xlabel('Time(s)');
-ylabel('Meters(m)');
+figure(2)
+subplot(2,1,1)
+plot(t,Xreal(5,:))
+legend('Alt')
+title('Real Altitude')
+xlabel('Time(s)')
+ylabel('Meters(m)')
 
-subplot(2,1,2);
-plot(t,Xreal([7,9,11],:).*Rad2Deg);
-legend('\phi','\theta','\psi');
-title('Real Attitude');
-xlabel('Time(s)');
-ylabel('Degrees(d)');
+subplot(2,1,2)
+plot(t,Xreal([7,9,11],:).*Rad2Deg)
+legend('\phi','\theta','\psi')
+title('Real Attitude')
+xlabel('Time(s)')
+ylabel('Degrees(d)')
 
-figure(3);
-subplot(2,1,1);
-plot(t,Xest(1,:));
-legend('Alt_e');
-title('Estimated Altitude');
-xlabel('Time(s)');
-ylabel('Meters(m)');
+figure(3)
+subplot(2,1,1)
+plot(t,Xest(1,:))
+legend('Alt_e')
+title('Estimated Altitude')
+xlabel('Time(s)')
+ylabel('Meters(m)')
 
-subplot(2,1,2);
-plot(t,Xest([3,5,7],:).*Rad2Deg);
-legend('\phi_e','\theta_e','\psi_e');
-title('Estimated Attitude');
-xlabel('Time(s)');
-ylabel('Degrees(d)');
+subplot(2,1,2)
+plot(t,Xest([3,5,7],:).*Rad2Deg)
+legend('\phi_e','\theta_e','\psi_e')
+title('Estimated Attitude')
+xlabel('Time(s)')
+ylabel('Degrees(d)')
 
-figure(4);
-subplot(2,1,1);
-plot(t,e(1,:));
-legend('e_z');
-title('Altitude prediction error');
-xlabel('Time(s)');
-ylabel('Error meters(m)');
+figure(4)
+subplot(2,1,1)
+plot(t,e(1,:))
+legend('e_z')
+title('Altitude prediction error')
+xlabel('Time(s)')
+ylabel('Error meters(m)')
 
-subplot(2,1,2);
-plot(t,e([2,3,4],:).*Rad2Deg);
-legend('e_\phi','e_\theta','e_\psi');
-title('Attitude prediction error');
-xlabel('Time(s)');
-ylabel('Error degrees(d)');
+subplot(2,1,2)
+plot(t,e([2,3,4],:).*Rad2Deg)
+legend('e_\phi','e_\theta','e_\psi')
+title('Attitude prediction error')
+xlabel('Time(s)')
+ylabel('Error degrees(d)')
 
-figure(5);
-plot(t,U);
-legend('U1','U2','U3','U4','U5','U6');
-title('Inputs PWM  Signal');
-xlabel('Time(s)');
-ylabel('Micro Seconds(ms)');
+figure(5)
+plot(t,U)
+legend('U1','U2','U3','U4','U5','U6')
+title('Inputs PWM  Signal')
+xlabel('Time(s)')
+ylabel('Micro Seconds(ms)')
 
 % Cpoles = eig(Adtaug - (Bdtaug*[Kdt,Kidt]));
 % % System Unstable
 % 
 % figure(6)
-% plot(Cpoles(1:14),'*');
+% plot(Cpoles(1:14),'*')
 % grid on
-% title('Closed-Loop Eigenvalues');
+% title('Closed-Loop Eigenvalues')
 
 %% PRINT TO CONFIGURATION FILES
 
 %K = round([Kdt,Kidt],2);
 
-writematrix(round(Kdt,2),'config.txt','Delimiter','comma')
+%writematrix(round(Kdt,2),'config.txt','Delimiter','comma')
 
-writematrix(round(Kidt,2),'config2.txt','Delimiter','comma')
+%writematrix(round(Kidt,2),'config2.txt','Delimiter','comma')
 
-writematrix(round(Ldt,2),'config3.txt','Delimiter','comma')
+%writematrix(round(Ldt,2),'config3.txt','Delimiter','comma')
