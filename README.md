@@ -1,3 +1,3 @@
-# Corinthians-V1-Flight-System
+# Atmega2650-Control-System
 
 Multirotor Flight System Employing State-Space LQG Control
