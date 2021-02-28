@@ -2,7 +2,7 @@
 
 #include <Servo.h>
 
-extern Servo Motor1,Motor2,Motor3,Motor4,Motor5,Motor6;
+extern Servo Motor1,Motor2,Motor3,Motor4;
 
 void Motors::RunMotors(Servo* Motor,int Gain)
 {
@@ -82,14 +82,12 @@ void Motors::MotorMix(Servo x, int y, int lower, int upper)
   RunMotors(&x,y);
 }
 
-void Motors::FlightControl(double m1,double m2,double m3,double m4,double m5,double m6)
+void Motors::FlightControl(double m1,double m2,double m3,double m4)
 {    
-  MotorMix(Motor1,m1,1300,2000); // Top Left
-  MotorMix(Motor2,m2,1300,2000); // Bottom Left
-  MotorMix(Motor3,m3,1300,2000); // Top Right
-  MotorMix(Motor4,m4,1300,2000); // Bottom Right
-  MotorMix(Motor5,m5,1300,2000); // Top Rear
-  MotorMix(Motor6,m6,1300,2000); // Bottom Rear
+  MotorMix(Motor1,m1,1200,2000); // Front Left
+  MotorMix(Motor2,m2,1200,2000); // Front Right
+  MotorMix(Motor3,m3,1200,2000); // Rear Left
+  MotorMix(Motor4,m4,1200,2000); // Rear Right
 }
 
 void Motors::StartUp()
@@ -98,8 +96,6 @@ void Motors::StartUp()
   RunMotors(&Motor2,1200);
   RunMotors(&Motor3,1200);
   RunMotors(&Motor4,1200);          // run all motors at same velocity on start up
-  RunMotors(&Motor5,1200);
-  RunMotors(&Motor6,1200);
 }
 
 void Motors::FullStop()
@@ -108,6 +104,4 @@ void Motors::FullStop()
   RunMotors(&Motor2,1000);
   RunMotors(&Motor3,1000);          // stop all motors
   RunMotors(&Motor4,1000);
-  RunMotors(&Motor5,1000);
-  RunMotors(&Motor6,1000);
 }
