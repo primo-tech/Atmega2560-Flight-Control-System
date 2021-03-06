@@ -10,7 +10,7 @@
 #include <Wire.h>
 #include <Servo.h>
 #include <BME280I2C.h>         // import wire library for i2c, servo library for motors
-#include <MPU6050.h>           // BME library for barometer, MPU library for IMU
+#include "MPU9250.h"           // BME library for barometer, MPU library for IMU
 
 class Initialise               // create initialisation class
 {
@@ -18,10 +18,10 @@ class Initialise               // create initialisation class
     int M1 = 3;     // Front Left
     int M2 = 5;     // Front Right
     int M3 = 6;     // Rear Left
-    int M4 = 9;     // Rear Right                 Motor Pin assignments
+    int M4 = 9;     // Rear Right        Motor Pin assignments
 
-    void InitSensors();          // initialise the sensors
-    void InitMotors();           // initialise the motors
+    void InitSensors();        // initialise the sensors
+    void InitMotors();         // initialise the motors
 };
 
 #endif

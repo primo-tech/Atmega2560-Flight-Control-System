@@ -4,10 +4,10 @@
 #include <Wire.h>
 #include <Servo.h>
 #include <BME280I2C.h>
-#include <MPU6050.h>
+#include "MPU9250.h"
 
 Servo Motor1,Motor2,Motor3,Motor4;  // create instances of the servo class for motor control
-MPU6050 mpu;
+MPU9250 mpu;
 BME280I2C bme;    // Default : forced mode, standby time = 1000 ms
                   // Oversampling = pressure ×1, temperature ×1, humidity ×1, filter off,
                   
@@ -15,48 +15,41 @@ void Initialise::InitSensors()
 {
   while(!bme.begin())
   {
-    //Serial.println("Could not find BME280 sensor!");
+    Serial.println("Could not find BME280 sensor!");
     delay(1000);
   }
 
   switch(bme.chipModel())
   {
      case BME280::ChipModel_BME280:
-       //Serial.println("Found BME280 sensor! Success.");
+       Serial.println("Found BME280 sensor! Success.");
        break;
      case BME280::ChipModel_BMP280:
-       //Serial.println("Found BMP280 sensor! No Humidity available.");
+       Serial.println("Found BMP280 sensor! No Humidity available.");
        break;
      default:
        Serial.println("Found UNKNOWN sensor! Error!");
-  }
-  
-  while(!mpu.begin(MPU6050_SCALE_2000DPS, MPU6050_RANGE_2G))
-  {
-    //Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
-    delay(500);
   }
 }
 
 void Initialise::InitMotors()
 {
   Motors motor;
-  mpu.calibrateGyro();
-  mpu.setThreshold(10);                   // calibrate the gyroscope
+  
+  mpu.setup();
+  delay(5000);
+  mpu.calibrateAccelGyro();
+  mpu.calibrateMag();                   // calibrate the IMU
   
   Motor1.attach(M1);
   Motor2.attach(M2);
   Motor3.attach(M3);
-  Motor4.attach(M4);                      // intialise the motors to pins
+  Motor4.attach(M4);                    // intialise the motors to pins
   
   motor.RunMotors(&Motor1,1000);
   motor.RunMotors(&Motor2,1000);
   motor.RunMotors(&Motor3,1000);
-  motor.RunMotors(&Motor4,1000);          // set motors to lowest command value
+  motor.RunMotors(&Motor4,1000);        // set motors to lowest command value
   
-  //digitalWrite(12,0);
-  //digitalWrite(13,1);
   delay(10000);
-  //digitalWrite(12,1);
-  //digitalWrite(13,0);
 }

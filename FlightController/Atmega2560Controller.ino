@@ -50,9 +50,6 @@ void setup()
   Serial.begin(9600);
   Wire.begin();                // join i2c bus with address #1
   
-  //Serial.println("Initialize BME280");
-  //Serial.println("Initialize MPU6050");
-  
   HexaModel.A << 1,0.01,0,0,0,0,0,0,-3.555801184840882e-08,-3.555801184840882e-08,-3.555801184840882e-08,-3.555801184840882e-08
                  0,1,0,0,0,0,0,0,-6.62492896954863e-06,-6.62492896954863e-06,-6.62492896954863e-06,-6.62492896954863e-06
                  0,0,1,0.01,0,0,0,0,4.692184455213431e-07,4.692184455213431e-07,-4.692184455213431e-07,-4.692184455213431e-07
@@ -126,12 +123,10 @@ void loop()
 {
   motor.FullStop();  // otherwise set all motor values to 0
   breakout = 0;
-  read_rc();         // read receiver values 
-  //digitalWrite(4,1);   
+  read_rc();         // read receiver values  
   
   if(ch[1]< 1100 && ch[2] > 1800 && ch[3] < 1300 && ch[4] < 1100)
   {
-    //digitalWrite(4,0);
     inital.InitSensors();      // intialise IMU and Barometer
     inital.InitMotors();       // intialise motors and calibrate IMU
 
@@ -232,8 +227,6 @@ void MainLoop()
         
         if( shutdowntime > 4000)                 // if running count exceeds 4000 counts break out of main loop
         {                                        // and reset all setpoints to zero
-          //digitalWrite(12,0);
-          //digitalWrite(13,0);
           breakout = 1;
         }
     }
@@ -243,7 +236,7 @@ void MainLoop()
     motor.FlightControl(controller.u(0) + ue(0),controller.u(1) + ue(1),controller.u(2) + ue(2),controller.u(3) + ue(3));  // send controller output tomotors
     
     timeBetFrames = millis() - timer;
-    delay((timeStep*1000) - timeBetFrames);   // run Loop at 100Hz
+    delay((timeStep*1000) - timeBetFrames);     // run Loop at 100Hz
   }
 }                    
 /*

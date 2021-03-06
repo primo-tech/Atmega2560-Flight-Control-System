@@ -95,13 +95,13 @@ void Motors::StartUp()
   RunMotors(&Motor1,1200);
   RunMotors(&Motor2,1200);
   RunMotors(&Motor3,1200);
-  RunMotors(&Motor4,1200);          // run all motors at same velocity on start up
+  RunMotors(&Motor4,1200);       // run all motors at same velocity on start up
 }
 
 void Motors::FullStop()
 {
   RunMotors(&Motor1,1000);
   RunMotors(&Motor2,1000);
-  RunMotors(&Motor3,1000);          // stop all motors
+  RunMotors(&Motor3,1000);      // stop all motors
   RunMotors(&Motor4,1000);
 }

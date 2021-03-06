@@ -10,7 +10,7 @@
 #include <Wire.h>
 #include <Servo.h>
 #include <BME280I2C.h>         // import wire library for i2c, servo library for motors
-#include <MPU6050.h>           // BME library for barometer, MPU library for IMU
+#include "MPU9250.h"           // BME library for barometer, MPU library for IMU
 
 class Motors                   // create motor control class
 {
