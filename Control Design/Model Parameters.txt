@@ -1,0 +1,45 @@
+General
+	Part Number	StackBot Air
+	Part Name	StackBot Air v29
+	Description
+	Material Name	(Various)
+
+Manage
+	Item Number
+	Lifecycle
+	Revision
+	State
+	Change Order
+
+Physical
+	Mass	1157.685 g
+	Volume	477.37 cm^3
+	Density	2.425 g / cm^3
+	Area	3826.941 cm^2
+	World X,Y,Z	0.00 cm, 0.00 cm, 0.00 cm
+	Center of Mass	0.00 cm, 1.353 cm, -0.013 cm
+	Bounding Box
+		Length	64.307 cm
+		Width	16.733 cm
+		Height	63.481 cm
+	Moment of Inertia at Center of Mass   (g cm^2)
+		Ixx	1.129E+05
+		Ixy	79.795
+		Ixz	955.236
+		Iyx	79.795
+		Iyy	2.033E+05
+		Iyz	-100.828
+		Izx	955.236
+		Izy	-100.828
+		Izz	1.129E+05
+	Moment of Inertia at Origin   (g cm^2)
+		Ixx	1.150E+05
+		Ixy	80.071
+		Ixz	955.233
+		Iyx	80.071
+		Iyy	2.033E+05
+		Iyz	-80.30
+		Izx	955.233
+		Izy	-80.30
+		Izz	1.150E+05
+
