@@ -15,13 +15,13 @@
 class Initialise               // create initialisation class
 {
   public:
-    int M1 = 3;     // Front Left
-    int M2 = 5;     // Front Right
-    int M3 = 6;     // Rear Left
-    int M4 = 9;     // Rear Right        Motor Pin assignments
+    int M1 = 3;                // Front Left
+    int M2 = 5;                // Front Right
+    int M3 = 6;                // Rear Left
+    int M4 = 9;                // Rear Right        Motor Pin assignments
 
-    void InitSensors();        // initialise the sensors
-    void InitMotors();         // initialise the motors
+    void initSensors();        // initialise the sensors
+    void initMotors();         // initialise the motors
 };
 
 #endif

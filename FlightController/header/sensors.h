@@ -14,10 +14,9 @@
 class Sensors
 {
   public:
-    double ALT();       // calculated the current altitude above sea level
-    double *IMU();        // calculate the current pose roll, pitch, yaw(x,y,z)
+    double ALT();           // calculated the current altitude above sea level
+    double *IMU();          // calculate the current pose roll, pitch, yaw(x,y,z)
   private:
-    float timeStep = 0.01;   // time step for consistent cycle time and thus frequency
     /*
     * BAROMETER VALUES
     */

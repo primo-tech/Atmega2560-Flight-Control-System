@@ -102,6 +102,6 @@ void Motors::FullStop()
 {
   RunMotors(&Motor1,1000);
   RunMotors(&Motor2,1000);
-  RunMotors(&Motor3,1000);      // stop all motors
+  RunMotors(&Motor3,1000);       // stop all motors
   RunMotors(&Motor4,1000);
 }

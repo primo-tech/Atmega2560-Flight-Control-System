@@ -50,7 +50,7 @@ void setup()
   Serial.begin(9600);
   Wire.begin();                // join i2c bus with address #1
   
-  HexaModel.A << 1,0.01,0,0,0,0,0,0,-3.555801184840882e-08,-3.555801184840882e-08,-3.555801184840882e-08,-3.555801184840882e-08,
+  QuadModel.A << 1,0.01,0,0,0,0,0,0,-3.555801184840882e-08,-3.555801184840882e-08,-3.555801184840882e-08,-3.555801184840882e-08,
                  0,1,0,0,0,0,0,0,-6.62492896954863e-06,-6.62492896954863e-06,-6.62492896954863e-06,-6.62492896954863e-06,
                  0,0,1,0.01,0,0,0,0,4.692184455213431e-07,4.692184455213431e-07,-4.692184455213431e-07,-4.692184455213431e-07,
                  0,0,0,1,0,0,0,0,8.742161642876062e-05,8.742161642876062e-05,-8.742161642876062e-05,-8.742161642876062e-05,
@@ -63,7 +63,7 @@ void setup()
                  0,0,0,0,0,0,0,0,0,0,0.6426210983825759,0,
                  0,0,0,0,0,0,0,0,0,0,0,0.6426210983825759;
 
-  HexaModel.B << -6.328350532572434e-08,-6.328350532572434e-08,-6.328350532572434e-08,-6.328350532572434e-08,
+  QuadModel.B << -6.328350532572434e-08,-6.328350532572434e-08,-6.328350532572434e-08,-6.328350532572434e-08,
                  -1.833015510785475e-05,-1.833015510785475e-05,-1.833015510785475e-05,-1.833015510785475e-05,
                  8.350800973538338e-07,8.350800973538338e-07,-8.350800973538338e-07,-8.350800973538338e-07,
                  0.0002418821086662523,0.0002418821086662523,-0.0002418821086662523,-0.0002418821086662523,
@@ -76,12 +76,12 @@ void setup()
                  0,0,4.166187783441478,0,
                  0,0,0,4.166187783441478;
                                      
-  HexaModel.C << 1,0,0,0,0,0,0,0,0,0,0,0,
+  QuadModel.C << 1,0,0,0,0,0,0,0,0,0,0,0,
                  0,0,1,0,0,0,0,0,0,0,0,0,
                  0,0,0,0,1,0,0,0,0,0,0,0,     // Sensor Matrix
                  0,0,0,0,0,0,1,0,0,0,0,0;
 
-  HexaModel.D << 0,0,0,0,
+  QuadModel.D << 0,0,0,0,
                  0,0,0,0,       // FeedForward Matrix
                  0,0,0,0,
                  0,0,0,0;
@@ -127,8 +127,8 @@ void loop()
   
   if(ch[1]< 1100 && ch[2] > 1800 && ch[3] < 1300 && ch[4] < 1100)
   {
-    inital.InitSensors();      // intialise IMU and Barometer
-    inital.InitMotors();       // intialise motors and calibrate IMU
+    inital.initSensors();      // intialise IMU and Barometer
+    inital.initMotors();       // intialise motors and calibrate IMU
 
     while(breakout != 1)
     {
@@ -163,13 +163,6 @@ void MainLoop()
   /*
    * Reference INPUTS
    */
-  double alt;
-  double *xA;
-  double *yA;
-  double *zA;
-
-  double Ainput,Rinput,Pinput;
-  double initialAlt;
 
   double ThrottleSetPoint = 0;
   double AltitudeSetPoint = 0;
@@ -177,10 +170,10 @@ void MainLoop()
   double RollSetPoint = 0;
   double YawSetPoint = 0;;
   
-  initialAlt = 0;
+  double initialAlt = 0;
   for(int counter = 0; counter < 10; counter++)
   {
-    initialAlt += readIn.Altitude();
+    initialAlt += sensor.ALT();
   }
   initialAlt = initialAlt/10;
   
@@ -190,25 +183,21 @@ void MainLoop()
   
     read_rc();                 // begin decoding PPM values
     
-    xA = sensor.IMU();
-    yA = sensor.IMU()+1;       // read in roll, pitch and yaw IMU values
-    zA = sensor.IMU()+2;          
-    
-	  y(0) = sensor.ALT();       // read in current altitude value
-    y(1) = *xA;                // Read in Systems Outputs
-    y(2) = *yA;
-    y(3) = *zA;
+	  y(0) = sensor.ALT() - initialAlt;     // read in current altitude value
+    y(1) = *(sensor.IMU());               // read in Systems Outputs
+    y(2) = *(sensor.IMU()+1);             // read in roll, pitch and yaw IMU values
+    y(3) = *(sensor.IMU()+2); 
     
     ThrottleSetPoint =  map(ch[1],1040,2020,1000,1800);            // read in throttle setpoint
     
     if(ThrottleSetPoint > 1050)
     {
-        Ainput = y(0);
+        double Ainput = y(0);
         AltitudeSetPoint = motor.AltitudeControl(ThrottleSetPoint,Ainput,initialAlt); // calcute the altitude setpoint from throttle commands
         PitchSetPoint = map(ch[4],1000,1900,10,-10);
         RollSetPoint = map(ch[3],1000,1900,10,-10);   // read in roll pitch and yaw setpoint values from receiver
                                                       // and map to between 0 and 10 degrees 
-        YawSetPoint = map(ch[2],1070,1930,-200,200);  // non feedback rate control for yaw
+        YawSetPoint += map(ch[2],1070,1930,-5,5);     // feedback ramp input for yaw
         
         controller.r << AltitudeSetPoint,PitchSetPoint,RollSetPoint,YawSetPoint;   // set controller references
         
@@ -231,12 +220,12 @@ void MainLoop()
         }
     }
 
-    controller.update(y,timeStep);              // Update Outputs values
+    controller.update(y,timeStep);               // Update Outputs values
  
     motor.FlightControl(controller.u(0) + ue(0),controller.u(1) + ue(1),controller.u(2) + ue(2),controller.u(3) + ue(3));  // send controller output tomotors
     
     timeBetFrames = millis() - timer;
-    delay((timeStep*1000) - timeBetFrames);     // run Loop at 100Hz
+    delay((timeStep*1000) - timeBetFrames);      // run Loop at 100Hz
   }
 }                    
 /*
@@ -249,19 +238,19 @@ void read_me()
 {
   int j;
   
-  aa=micros();   // store time value a when pin value falling
-  cc=aa-bb;      // calculating time inbetween two peaks
-  bb=aa;         
-  x[ii]=cc;      // storing 15 value in array
-  ii=ii+1;       
+  aa = micros();   // store time value a when pin value falling
+  cc = aa-bb;      // calculating time inbetween two peaks
+  bb = aa;         
+  x[ii] = cc;      // storing 15 value in array
+  ii = ii + 1;       
 
-  if(ii==15)
+  if(ii == 15)
   {
     for(j=0;j<15;j++) 
     {
-      ch1[j]=x[j];
+      ch1[j] = x[j];
     }
-    ii=0;
+    ii = 0;
   }
 }  // copy store all values from temporary array another array after 15 reading 
 
@@ -269,16 +258,16 @@ void read_rc()
 {
   int j;
   
-  for(int k=14;k>-1;k--)
+  for(int k = 14;k > -1;k--)
   {
-    if(ch1[k]>10000)
+    if(ch1[k] > 10000)
     {
-      j=k;
+      j = k;
     }
   }  // detecting separation space 10000us in that another array
                     
-  for(int i=1;i<=6;i++)
+  for(int i = 1;i <= 6;i++)
   {
-    ch[i]=(ch1[i+j]);
+    ch[i] = (ch1[i+j]);
   }
 }     // assign 6 channel values after separation space
